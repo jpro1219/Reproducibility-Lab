@@ -77,16 +77,16 @@ div.csl-indent {
 }</style>
 
 
-<script src="lab-reproducibility_files/libs/clipboard/clipboard.min.js"></script>
-<script src="lab-reproducibility_files/libs/quarto-html/quarto.js"></script>
-<script src="lab-reproducibility_files/libs/quarto-html/popper.min.js"></script>
-<script src="lab-reproducibility_files/libs/quarto-html/tippy.umd.min.js"></script>
-<script src="lab-reproducibility_files/libs/quarto-html/anchor.min.js"></script>
-<link href="lab-reproducibility_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="lab-reproducibility_files/libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="lab-reproducibility_files/libs/bootstrap/bootstrap.min.js"></script>
-<link href="lab-reproducibility_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="lab-reproducibility_files/libs/bootstrap/bootstrap-1bc8a17f135ab3d594c857e9f48e611b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="lab-reproducibility-key_files/libs/clipboard/clipboard.min.js"></script>
+<script src="lab-reproducibility-key_files/libs/quarto-html/quarto.js"></script>
+<script src="lab-reproducibility-key_files/libs/quarto-html/popper.min.js"></script>
+<script src="lab-reproducibility-key_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="lab-reproducibility-key_files/libs/quarto-html/anchor.min.js"></script>
+<link href="lab-reproducibility-key_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="lab-reproducibility-key_files/libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="lab-reproducibility-key_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="lab-reproducibility-key_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="lab-reproducibility-key_files/libs/bootstrap/bootstrap-1bc8a17f135ab3d594c857e9f48e611b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 
 
 </head>
@@ -385,7 +385,7 @@ Due date
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="lab-reproducibility_files/figure-html/exploratory%20fixed-1.png" class="img-fluid figure-img" width="1536"></p>
+<p><img src="lab-reproducibility-key_files/figure-html/exploratory%20fixed-1.png" class="img-fluid figure-img" width="1536"></p>
 </figure>
 </div>
 </div>
@@ -538,7 +538,7 @@ Due date
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="lab-reproducibility_files/figure-html/heat%20map%20fixed-1.png" class="img-fluid figure-img" width="1536"></p>
+<p><img src="lab-reproducibility-key_files/figure-html/heat%20map%20fixed-1.png" class="img-fluid figure-img" width="1536"></p>
 </figure>
 </div>
 </div>
@@ -670,7 +670,7 @@ Due date
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="lab-reproducibility_files/figure-html/scoring%20fixed-1.png" class="img-fluid figure-img" width="1344"></p>
+<p><img src="lab-reproducibility-key_files/figure-html/scoring%20fixed-1.png" class="img-fluid figure-img" width="1344"></p>
 </figure>
 </div>
 </div>
@@ -729,7 +729,7 @@ Due date
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="lab-reproducibility_files/figure-html/roc-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="lab-reproducibility-key_files/figure-html/roc-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -739,8 +739,8 @@ Due date
 <p><strong>Yes</strong></p>
 <p>Now, we will calculate the area under curve to evaluate how close to a perfect model it can be. The following chunk creates and displays a table of the value.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Create table with aucs of the rocs</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>aucs <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Model=</span><span class="fu">c</span>(<span class="st">"Logistic Regression"</span>, <span class="st">"Naive Bayes"</span>, <span class="st">"LDA"</span>, <span class="st">"RF"</span>), <span class="at">AUC=</span><span class="fu">c</span>(<span class="fu">auc</span>(roc.logit)))</span>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Create table with auc of the roc</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>auc <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Model=</span><span class="fu">c</span>(<span class="st">"Logistic Regression"</span>), <span class="at">AUC=</span><span class="fu">c</span>(<span class="fu">auc</span>(roc.logit)))</span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(scoring, <span class="at">digits =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Clearly, this table is not displaying AUC. Parse through the chunk and look for the error. What is causing the problem?</p>
@@ -748,40 +748,20 @@ Due date
 <p>In the chunk below, make the edit to fix the chunk.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Create table with aucs of the rocs</span></span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>aucs <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Model=</span><span class="fu">c</span>(<span class="st">"Logistic Regression"</span>, <span class="st">"Naive Bayes"</span>, <span class="st">"LDA"</span>, <span class="st">"RF"</span>), <span class="at">AUC=</span><span class="fu">c</span>(<span class="fu">auc</span>(roc.logit)))</span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(scoring, <span class="at">digits =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>auc <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Model=</span><span class="fu">c</span>(<span class="st">"Logistic Regression"</span>), <span class="at">AUC=</span><span class="fu">c</span>(<span class="fu">auc</span>(roc.logit)))</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(auc, <span class="at">digits =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
 <th style="text-align: left;">Model</th>
-<th style="text-align: right;">thirty</th>
-<th style="text-align: right;">forty</th>
-<th style="text-align: right;">fifty</th>
-<th style="text-align: right;">sixty</th>
+<th style="text-align: right;">AUC</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">Accuracy</td>
-<td style="text-align: right;">0.635</td>
-<td style="text-align: right;">0.654</td>
-<td style="text-align: right;">0.684</td>
-<td style="text-align: right;">0.696</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Precision</td>
-<td style="text-align: right;">0.610</td>
-<td style="text-align: right;">0.642</td>
-<td style="text-align: right;">0.704</td>
-<td style="text-align: right;">0.780</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Specificity</td>
-<td style="text-align: right;">0.254</td>
-<td style="text-align: right;">0.414</td>
-<td style="text-align: right;">0.614</td>
-<td style="text-align: right;">0.781</td>
+<td style="text-align: left;">Logistic Regression</td>
+<td style="text-align: right;">0.759</td>
 </tr>
 </tbody>
 </table>
