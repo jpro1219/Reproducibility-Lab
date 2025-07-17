@@ -19,17 +19,17 @@ This lab is due on **XX/XX.** To be considered on time, the following must be do
 
 # Reproducibility
 
-In this lab, you will run code based on analysis in published studies. You will resolve any errors in the given code, detailing and fixing any differences in the provided analysis and the run code. Then, you will assess the reproducibility of the given analysis and document what errors and inconsistencies were encountered. The text excerpts used in this lab were adapted off @wagner2021
+In this lab, you will run code based on the data analysis in a published paper on identifying poisonous mushrooms. Based on the guided instructions and the errors you receive, you will fix the code to make it better run on your system. Then, you will assess the reproducibility of the given analysis and document what errors and inconsistencies were encountered. The text excerpts used in this lab were adapted off @wagner2021
 
 # Learning goals
 
 By the end of the lab you will be able to…
 
--   validate or invalidate the original findings of a research study
+-   Clone and utilize files from GitHub through RStudio
 
 -   Reproduce the figures and analysis from a research study
 
--   Resolve errors common in code published from research studies
+-   Find and resolve errors which hinder reproducibility
 
 -   Assess the reproducibility of the study
 
@@ -107,31 +107,45 @@ This analysis includes the following variables (after data cleaning and renaming
 
 **Goal**: The goal of the analysis is to resolve any errors or add any code necessary to validate and reproduce the provided figures.
 
-## Exercise 0
+## Exercise 1
 
 A primary issue in reproducibility is the public availability of code and raw data in published literature. To improve the reproducibility, many authors link a GitHub repository in their study. For the following reproducibility lab, the GitHub is linked as follows: https://github.com/jpro1219/Reproducibility-Lab
 
+Run this code in your Terminal to clone the repository to your system.
+
 git clone https://github.com/jpro1219/Reproducibility-Lab
 
-Clone the repository to your system and then move the data file mushrooms.csv into your data structure. Then read the data into the system.
-
-(Possible errors to put in: do not convert NA strings, do not put in semicolons as separators)
+Now, move the data file mushrooms.csv into your data structure. Then read the data into the system.
 
 ```{r}
 #| lable: read-data
 #| warning: false
 #| message: false
-mushrooms <- read.csv("data/mushrooms.csv", sep=';', na.strings=c("", "NA")) # Convert empty strings to NA
+mushrooms <- read.csv("data/mushrooms.csv")
 ```
 
-## Exercise 1
+View the dataframe in your environment tab. What character was used as the delimiter?
 
-Data cleaning: removing columns with missing values, removing columns with unknown category, renaming categorical variables, turning class into factor
+Semicolon ;
 
-Possible errors: Changing poisonous to be 1, nonpoisonous to 0, allowing students to figure out that stem color contains an unknown value, skipping one or two values in categorical data
+To allow the data to read in correctly, we will need to correctly specify the delimiter in the following chunk.
 
 ```{r}
+#| lable: read-data
+#| warning: false
+#| message: false
+mushrooms <- read.csv("data/mushrooms.csv", sep=';') # Specify delimiter as ___
+```
 
+Return to the dataframe and confirm that each observation is read correctly.
+
+## Exercise 2
+
+The goal of this analysis will be to perform a logistic regression to predict whether a given mushroom is poisonous or edible. There are a few data cleaning considerations that must be taken into account before we begin.
+
+First, we want to ensure there are no missing values for predictors in any observation, as this would make it difficult to test any data point, given the nature of these missing points is unknown.
+
+```{r}
 ## Remove columns with missing values
 
 cleaned_mushrooms <- mushrooms
@@ -140,28 +154,45 @@ for (colname in colnames(mushrooms)){
     cleaned_mushrooms[colname] <- NULL
   }
 }
-## Remove column with extraneous category
-cleaned_mushrooms <- subset(cleaned_mushrooms, select = -stem.color) # Stem color contained one unknown value
+```
 
-## Renaming categorical variables for clear identification
-cleaned_mushrooms$class <- factor(cleaned_mushrooms$class)
-levels(cleaned_mushrooms$class) <- c("Edible", "Poisonous")
-cleaned_mushrooms$does.bruise.or.bleed <- factor(cleaned_mushrooms$does.bruise.or.bleed)
-levels(cleaned_mushrooms$does.bruise.or.bleed) <- c("No", "Yes")
-cleaned_mushrooms$has.ring <- factor(cleaned_mushrooms$has.ring)
-levels(cleaned_mushrooms$has.ring) <- c("No", "Yes")
-cleaned_mushrooms$cap.shape <- factor(cleaned_mushrooms$cap.shape)
-levels(cleaned_mushrooms$cap.shape) <- c("Bell", "Conical", "Flat", "Others", "Spherical", "Sunken", "Convex")
-cleaned_mushrooms$cap.color <- factor(cleaned_mushrooms$cap.color)
-levels(cleaned_mushrooms$cap.color) <- c("Buff", "Red", "Gray", "Black", "Blue", "Brown", "Orange", "Pink", "Green", "Purple", "White", "Yellow")
-cleaned_mushrooms$gill.color <- factor(cleaned_mushrooms$gill.color)
-levels(cleaned_mushrooms$gill.color) <- c("Buff", "Red", "Gray", "Black", "Blue", "Brown", "Orange", "Pink", "Green", "Purple", "White", "Yellow")
-cleaned_mushrooms$habitat <-
-factor(cleaned_mushrooms$habitat)
-levels(cleaned_mushrooms$habitat) <- c("Woods", "Grasses", "Heaths", "Leaves", "Meadows", "Paths", "Urban", "Waste")
-cleaned_mushrooms$season <-
-factor(cleaned_mushrooms$season)
-levels(cleaned_mushrooms$season) <- c("Autumn", "Spring", "Summer", "Winter")
+View the new dataframe cleaned_mushrooms in your environment tab. Do you see any columns with missing values? Which columns?
+
+Yes, gill.spacing
+
+These empty entries are written in the data set as a blank space, rather than NA. To fix this, we can return to our chunk that reads in data and make sure that all missing entries are known to be missing entries. Edit the na.strings parameter to turn all blank entries ("") to NA ("NA")
+
+```{r}
+#| lable: read-data
+#| warning: false
+#| message: false
+mushrooms <- read.csv("data/mushrooms.csv", sep=';', na.strings=c("", "NA")) # Specify delimiter as ___, change na from blank to NA
+```
+
+Now run the removal chunk again:
+
+```{r}
+## Remove columns with missing values
+
+cleaned_mushrooms <- mushrooms
+for (colname in colnames(mushrooms)){
+  if (sum(is.na(mushrooms[colname])) != 0){ # Columns with 1 or more missing values
+    cleaned_mushrooms[colname] <- NULL
+  }
+}
+```
+
+## Exercise 3
+
+Because our goal is to identify which mushrooms are poisonous, rather than edible, we want to make sure our outcome "success" is defined as poisonous.
+
+By default, which will R define as a success?
+
+Edible
+
+To ensure that our "success" is defined as poisonous, we will create another category for class as a binary variable.
+
+```{r}
 
 ## Adding category for class as a binary variable
 cleaned_mushrooms <- cleaned_mushrooms |>
@@ -169,11 +200,78 @@ cleaned_mushrooms <- cleaned_mushrooms |>
     binary_class = as.factor(if_else(class == "Poisonous", 1, 0)))
 ```
 
-## Exercise 2
+## Exercise 4
 
-Exploratory data analysis
+Before we begin our regression, we should start by identifying some of the more influential predictor variables with some exploratory data analysis. While we have 18 possible predictor variables, we have limited to 10 of the more significant variables (where most entries have a non "none" value) to avoid overfitting and losing predictive power.
 
-Possible error: having one variables' values negated in the data file
+The figures from the analysis we are reproducing were a part of the repository you have cloned. Open up the cloned repository and locate the file: this figure should be organized under Reproducibility-Lab/Figures/Figure1_Exploratory.png.
+
+Check the figure produced in the following chunk against the true figure.
+
+```{r fig.width=16, fig.height=18}
+
+## Plotting quantitative variables
+
+
+cap_edible_plot <- ggplot(subset(cleaned_mushrooms, class == "Edible"), aes(cap.shape, cap.diameter)) +
+  labs(title="Edible Mushroom Cap Diameter by Shape", x="Cap Shape", y="Cap Diameter (cm)") +
+  geom_boxplot()
+
+cap_poison_plot <- ggplot(subset(cleaned_mushrooms, class == "Poisonous"), aes(cap.shape, cap.diameter)) +
+  labs(title="Poisonous Mushroom Cap Diameter by Shape", x="Cap Shape", y="Cap Diameter (cm)") +
+  geom_boxplot()
+
+cap_color_edible_plot <- ggplot(subset(cleaned_mushrooms, class=="Edible"), aes(cap.color, cap.diameter)) + 
+  labs(title="Edible Mushroom Cap Diameter by Color", x="Cap Color", y="Cap Diameter (cm)") +
+  geom_boxplot()
+
+cap_color_poison_plot <- ggplot(subset(cleaned_mushrooms, class=="Poisonous"), aes(cap.color, cap.diameter)) + 
+  labs(title="Poisonous Mushroom Cap Diameter by Color", x="Cap Color", y="Cap Diameter (cm)") +
+  geom_boxplot()
+
+edible_plot <- ggplot(subset(cleaned_mushrooms, class == 'Edible'), aes(x = stem.width, y = stem.height, color= stem.color)) +
+  labs(title="Stem dimensions for Edible Mushrooms", color="Has Ring", x="Stem Width (cm)", y="Stem Height (cm)") +
+  geom_point()
+
+poison_plot <- ggplot(subset(cleaned_mushrooms, class == 'Poisonous'), aes(x = stem.width, y = stem.height, color=stem.color)) +
+  labs(title="Stem dimensions for Poisonous Mushrooms", color="Has Ring", x="Stem Width (cm)", y="Stem Height (cm)") +
+  geom_point()
+
+## Plotting categorical variables
+
+bruise_bleed <- as.data.frame(table(cleaned_mushrooms$does.bruise.or.bleed, cleaned_mushrooms$class))
+bruise_plot <- ggplot(bruise_bleed, aes(Var1, Var2, fill=Freq)) +
+  labs(title="Heat map of Bruising/Bleeding by Class", x="Does Bruise/Bleed", y="Class") +
+  theme(legend.key.width = unit(1, 'cm')) +
+  geom_tile()
+
+gill_color <- as.data.frame(table(cleaned_mushrooms$spore.print.color, cleaned_mushrooms$class))
+gill_color_plot <- ggplot(gill_color, aes(Var1, Var2, fill=Freq)) + 
+  labs(title="Heat map of Gill Color by Class", x="Gill Color", y="Class") +
+  theme(legend.key.width = unit(1, 'cm')) +
+  geom_tile()
+
+habitat <- as.data.frame(table(cleaned_mushrooms$habitat, cleaned_mushrooms$class))
+habitat_plot <- ggplot(habitat, aes(Var1, Var2, fill=Freq)) + 
+  labs(title="Heat map of Mushroom Habitat by Class", x="Habitat", y="Class") +
+  theme(legend.key.width = unit(1, 'cm')) +
+  geom_tile()
+
+season <- as.data.frame(table(cleaned_mushrooms$season, cleaned_mushrooms$class))
+season_plot <- ggplot(season, aes(Var1, Var2, fill=Freq)) + 
+  labs(title="Heat map of Season Mushroom is Found by Class", x="Season", y="Class") +
+  theme(legend.key.width = unit(1, 'cm')) +
+  geom_tile()
+
+## Compile all plots into figure, organized by part of mushroom
+ggarrange(cap_edible_plot, cap_poison_plot, cap_color_edible_plot, cap_color_poison_plot, edible_plot, poison_plot, bruise_plot, gill_color_plot, habitat_plot, season_plot, nrow = 5, ncol = 2)
+```
+
+What plots differ from the true results?
+
+Gill color by class uses another color set,  stem dimensions uses a different color label than has.ring
+
+To correct this, make sure that each plot references the correct column of cleaned_mushrooms
 
 ```{r fig.width=16, fig.height=18}
 
@@ -200,7 +298,7 @@ edible_plot <- ggplot(subset(cleaned_mushrooms, class == 'Edible'), aes(x = stem
   labs(title="Stem dimensions for Edible Mushrooms", color="Has Ring", x="Stem Width (cm)", y="Stem Height (cm)") +
   geom_point()
 
-poison_plot <- ggplot(subset(cleaned_mushrooms, class == 'Poisonous'), aes(x = stem.width, y = stem.height, color=has.ring)) +
+poison_plot <- ggplot(subset(cleaned_mushrooms, class == 'Poisonous'), aes(x = stem.width, y = stem.height, color= has.ring)) +
   labs(title="Stem dimensions for Poisonous Mushrooms", color="Has Ring", x="Stem Width (cm)", y="Stem Height (cm)") +
   geom_point()
 
@@ -232,14 +330,37 @@ season_plot <- ggplot(season, aes(Var1, Var2, fill=Freq)) +
 
 ## Compile all plots into figure, organized by part of mushroom
 ggarrange(cap_edible_plot, cap_poison_plot, cap_color_edible_plot, cap_color_poison_plot, edible_plot, poison_plot, bruise_plot, gill_color_plot, habitat_plot, season_plot, nrow = 5, ncol = 2)
+ggsave("Figures/Figure1_Exploratory.png", width = 20, height = 25)
 ```
 
-## Exercise 3
+## Exercise 5
 
-Creating training and test sets for our data analysis
+To create a predictive regression model, we will want to have data to test that our algorithm is not trained on. So, we will randomly select a sample for training and testing. By setting the seed, we change the set of random numbers which will be produced.
 
-Possible errors: Change numbers but comment the correct
+In the given code, the comments have different suggestions for the seed and size of training set than the written code. It is unclear which is the correct set. We will perform our regression and check against the cloned repository (the excel workbook containing the regression is filed as Reproducibility-Lab/data/Logit_reg_model.xlsx) to determine which set is correct.  
 
+Seed, Set as written
+
+```{r}
+## Set seed to 105 
+set.seed(130)
+
+## Take 75% of the cleaned mushrooms set for the training set, the remaining for the test set
+mushroom_numbers <- sample(seq_len(nrow(cleaned_mushrooms)), size = 0.70*nrow(cleaned_mushrooms))
+
+mushroom_train <- cleaned_mushrooms[mushroom_numbers,]
+mushroom_test <- cleaned_mushrooms[-mushroom_numbers,]
+```
+
+```{r}
+## Create regression model with all variables, no interaction terms to keep all uniform
+logit_reg_model <- glm(binary_class ~ stem.height + cap.diameter + cap.shape + cap.color + does.bruise.or.bleed + gill.color + stem.width + has.ring + habitat + season, data = mushroom_train, family = "binomial")
+
+tidy(logit_reg_model) |>
+  kable(digits=3)
+```
+
+Adjusted seed, set
 
 ```{r}
 ## Set seed to 105 
@@ -252,119 +373,154 @@ mushroom_train <- cleaned_mushrooms[mushroom_numbers,]
 mushroom_test <- cleaned_mushrooms[-mushroom_numbers,]
 ```
 
-## Exercise 4
-
-Measuring covariance of the variables
-
-Possible error: Add variable that has already been removed
-
 ```{r}
-
 ## Create regression model with all variables, no interaction terms to keep all uniform
 logit_reg_model <- glm(binary_class ~ stem.height + cap.diameter + cap.shape + cap.color + does.bruise.or.bleed + gill.color + stem.width + has.ring + habitat + season, data = mushroom_train, family = "binomial")
 
-vif_values <- vif(logit_reg_model)
-  kable(vif_values, digits = 3)
+tidy(logit_reg_model) |>
+  kable(digits=3)
 ```
 
-## Exercise 5
+Which set matches the excel workbook given in the repository?
 
-Training our other models
+The second, where the comments match the code.
 
-Possible error: Remove a variable from one or more so that they are not uniform
+Make sure the following chunk matches the correct chunk, so that the continued analysis will match the study.
 
 ```{r}
-naive_bayes_model <- naiveBayes(binary_class ~ stem.height + cap.shape + cap.diameter + cap.color + does.bruise.or.bleed + gill.color + stem.width + has.ring + habitat + season, data = mushroom_train)
+## Set seed to 105 
+set.seed(105)
 
-lda_model <- lda(binary_class ~ stem.height + cap.diameter + cap.shape + cap.color + does.bruise.or.bleed + gill.color + stem.width + has.ring + habitat + season, data = mushroom_train)
+## Take 75% of the cleaned mushrooms set for the training set, the remaining for the test set
+mushroom_numbers <- sample(seq_len(nrow(cleaned_mushrooms)), size = 0.75*nrow(cleaned_mushrooms))
 
-rf_model <- randomForest(binary_class ~ stem.height + cap.diameter + cap.shape + cap.color + cap.diameter + does.bruise.or.bleed + gill.color + stem.width + has.ring + habitat + season, data = mushroom_train)
+mushroom_train <- cleaned_mushrooms[mushroom_numbers,]
+mushroom_test <- cleaned_mushrooms[-mushroom_numbers,]
+```
+
+```{r}
+## Create regression model with all variables, no interaction terms to keep all uniform
+logit_reg_model <- glm(binary_class ~ stem.height + cap.diameter + cap.shape + cap.color + does.bruise.or.bleed + gill.color + stem.width + has.ring + habitat + season, data = mushroom_train, family = "binomial")
 ```
 
 ## Exercise 6
 
-Creating predictive probabilities and classes
+The following code will find and classify the predicted probabilities according to four thresholds, mutating them onto the training set. A common error when trying to reproduce code from published studies (in RStudio) is when multiple libraries contain the same function. In these cases, you may receive an error, because one function is perceived as being another of the same name.
 
-Possible Error: Use an incorrect threshold
+While the following chunk may not show any errors, to ensure the mutate function is the correct mutate function, replace them with dplyr::mutate before each to ensure they are running correctly.
 
 ```{r}
 ## Find probabilities and classify with standard threshold
 
 logit_pred_prob <- predict.glm(logit_reg_model, newdata=mushroom_test, type="response")
-logit_pred_class <- factor(ifelse(logit_pred_prob >0.50, 1, 0))
-
-bayes_pred_prob <- predict(naive_bayes_model, newdata = mushroom_test, type = "raw")
-naive_bayes_pred_class <- predict(naive_bayes_model, newdata = mushroom_test)
-
-lda_pred_prob <- predict(lda_model, newdata = mushroom_test, type = "prob")
-lda_pred_class <- predict(lda_model, newdata = mushroom_test)
-
-rf_pred_prob <- predict(rf_model, newdata = mushroom_test, type = "prob")
-rf_pred_class <- predict(rf_model, newdata = mushroom_test)
+mushroom_test <- dplyr::mutate(mushroom_test, logit_pred_class_30 = factor(ifelse(logit_pred_prob >0.30, 1, 0)))
+mushroom_test <- dplyr::mutate(mushroom_test, logit_pred_class_40 = factor(ifelse(logit_pred_prob >0.40, 1, 0)))
+mushroom_test <- dplyr::mutate(mushroom_test, logit_pred_class_50 = factor(ifelse(logit_pred_prob >0.50, 1, 0)))
+mushroom_test <- dplyr::mutate(mushroom_test, logit_pred_class_60 = factor(ifelse(logit_pred_prob >0.60, 1, 0)))
 ```
 
 ## Exercise 7
 
-Creating and plotting confusion matrices
-
-Possible Error: Rows/columns
+To create a graphic to display the success of the regression, we have used ggplot to make one single heatmap of our confusion matrices in the following chunk. Validate what is returned with the heatmap in the repository (filed in Figures/Figure2_ConfMats.png).
 
 ```{r}
 ## Compile all plots into figure, organized by part of mushroom
 
-bayes_conf <- as.data.frame(table(mushroom_test$binary_class, naive_bayes_pred_class))
-bayes_conf_plot <- ggplot(bayes_conf, aes(Var1, naive_bayes_pred_class, fill=Freq)) +
-  labs(title="Naive Bayes Confusion Matrix", x="True Class", y="Predicted Class") +
+logit_conf_30 <- as.data.frame(table(mushroom_test$binary_class, mushroom_test$logit_pred_class_30))
+logit_conf_plot_30 <- ggplot(logit_conf_30, aes(Var1, Var2, fill=Freq)) +
+  labs(title="Logistic Regression Confusion Matrix (Threshold = 0.30)", x="True Class", y="Predicted Class") +
   theme(legend.key.width = unit(1, 'cm')) +
-  geom_tile()
+  geom_tile() +
+  geom_text(aes(label=Freq), size = 5)
 
-logit_conf <- as.data.frame(table(mushroom_test$binary_class, logit_pred_class))
-logit_conf_plot <- ggplot(logit_conf, aes(Var1, logit_pred_class, fill=Freq)) +
-  labs(title="Logistic Regression Confusion Matrix", x="True Class", y="Predicted Class") +
+logit_conf_40 <- as.data.frame(table(mushroom_test$binary_class, mushroom_test$logit_pred_class_40))
+logit_conf_plot_40 <- ggplot(logit_conf_40, aes(Var1, Var2, fill=Freq)) +
+  labs(title="Logistic Regression Confusion Matrix (Threshold = 0.40)", x="True Class", y="Predicted Class") +
   theme(legend.key.width = unit(1, 'cm')) +
-  geom_tile()
+  geom_tile() +
+  geom_text(aes(label=Freq), size = 5)
 
-lda_conf <- as.data.frame(table(mushroom_test$binary_class, lda_pred_class[['class']]))
-lda_conf_plot <- ggplot(lda_conf, aes(Var1, Var2, fill=Freq)) +
-  labs(title="LDA Confusion Matrix", x="True Class", y="Predicted Class") +
+logit_conf_50 <- as.data.frame(table(mushroom_test$binary_class, mushroom_test$logit_pred_class_50))
+logit_conf_plot_50 <- ggplot(logit_conf_50, aes(Var1, Var2, fill=Freq)) +
+  labs(title="Logistic Regression Confusion Matrix (Threshold = 0.50)", x="True Class", y="Predicted Class") +
   theme(legend.key.width = unit(1, 'cm')) +
-  geom_tile()
+  geom_tile() +
+  geom_text(aes(label=Freq), size = 5)
 
-rf_conf <- as.data.frame(table(mushroom_test$binary_class, rf_pred_class))
-rf_conf_plot <- ggplot(rf_conf, aes(Var1, rf_pred_class, fill=Freq)) +
-  labs(title="rf Confusion Matrix", x="True Class", y="Predicted Class") +
+logit_conf_60 <- as.data.frame(table(mushroom_test$binary_class, mushroom_test$logit_pred_class_60))
+logit_conf_plot_60 <- ggplot(logit_conf_60, aes(Var1, Var2, fill=Freq)) +
+  labs(title="Logistic Regression Confusion Matrix (Threshold = 0.60)", x="True Class", y="Predicted Class") +
   theme(legend.key.width = unit(1, 'cm')) +
-  geom_tile()
+  geom_tile() +
+  geom_text(aes(label=Freq), size = 5)
 
-ggarrange(bayes_conf_plot, logit_conf_plot, lda_conf_plot, rf_conf_plot, nrow = 2, ncol = 2)
+ggarrange(logit_conf_plot_30, logit_conf_plot_40, logit_conf_plot_50, logit_conf_plot_60, nrow = 1, ncol = 1)
+```
+
+What is the difference between what was printed and what is filed?
+
+Each heatmap has a single graphic instead of all being compiled
+
+The issue lies in the ggarrange function. We need to specify the amount or rows and columns corresponding to amount of graphics we want and how we want the maps to fit together. Alter the numbers to match the printed output with what is in the file structure.
+
+
+```{r}
+## Compile all plots into figure, organized by part of mushroom
+
+logit_conf_30 <- as.data.frame(table(mushroom_test$binary_class, mushroom_test$logit_pred_class_30))
+logit_conf_plot_30 <- ggplot(logit_conf_30, aes(Var1, Var2, fill=Freq)) +
+  labs(title="Logistic Regression Confusion Matrix (Threshold = 0.30)", x="True Class", y="Predicted Class") +
+  theme(legend.key.width = unit(1, 'cm')) +
+  geom_tile() +
+  geom_text(aes(label=Freq), size = 5)
+
+logit_conf_40 <- as.data.frame(table(mushroom_test$binary_class, mushroom_test$logit_pred_class_40))
+logit_conf_plot_40 <- ggplot(logit_conf_40, aes(Var1, Var2, fill=Freq)) +
+  labs(title="Logistic Regression Confusion Matrix (Threshold = 0.40)", x="True Class", y="Predicted Class") +
+  theme(legend.key.width = unit(1, 'cm')) +
+  geom_tile() +
+  geom_text(aes(label=Freq), size = 5)
+
+logit_conf_50 <- as.data.frame(table(mushroom_test$binary_class, mushroom_test$logit_pred_class_50))
+logit_conf_plot_50 <- ggplot(logit_conf_50, aes(Var1, Var2, fill=Freq)) +
+  labs(title="Logistic Regression Confusion Matrix (Threshold = 0.50)", x="True Class", y="Predicted Class") +
+  theme(legend.key.width = unit(1, 'cm')) +
+  geom_tile() +
+  geom_text(aes(label=Freq), size = 5)
+
+logit_conf_60 <- as.data.frame(table(mushroom_test$binary_class, mushroom_test$logit_pred_class_60))
+logit_conf_plot_60 <- ggplot(logit_conf_60, aes(Var1, Var2, fill=Freq)) +
+  labs(title="Logistic Regression Confusion Matrix (Threshold = 0.60)", x="True Class", y="Predicted Class") +
+  theme(legend.key.width = unit(1, 'cm')) +
+  geom_tile() +
+  geom_text(aes(label=Freq), size = 5)
+
+ggarrange(logit_conf_plot_30, logit_conf_plot_40, logit_conf_plot_50, logit_conf_plot_60, nrow = 1, ncol = 1)
+ggsave("Figures/Figure2_ConfMats.png", width = 20, height = 15)
 ```
 
 ## Exercise 8
 
-Accuracy and F2
+Accuracy
 
 Possible errors: mess with ggarrange, write function for accuracy, f2 and flip them
 
 ```{r fig.width=7, fig.height=7}
 
 ## Calculate accuracy and f2 from the confusion matrix
-TN <- logit_conf[1,3] # Set all values on conf matrix
-FP <- logit_conf[3,3]
-FN <- logit_conf[2,3]
-TP <- logit_conf[4,3]
-precision <- TP/(TP + FP) # Apply formula for precision and recall (to plug into f2 score calculation)
-recall <- TP/(TP + FN)
-accuracy_logit <- (TP + TN) / sum(logit_conf[,3])
-f2_logit <- (1 + 2^2)*precision*recall/((2^2*precision) + recall)
+TN <- logit_conf_30[1,3] # Set all values on conf matrix
+FP <- logit_conf_30[3,3]
+FN <- logit_conf_30[2,3]
+TP <- logit_conf_30[4,3]
+precision_logit <- TP/(TP + FP) # Apply formula for precision
+accuracy_logit <- (TP + TN) / sum(logit_conf_30[,3])
 
-TN <- bayes_conf[1,3] # Set all values on conf matrix
-FP <- bayes_conf[3,3]
-FN <- bayes_conf[2,3]
-TP <- bayes_conf[4,3]
-precision <- TP/(TP + FP) # Apply formula for precision and recall (to plug into f2 score calculation)
-recall <- TP/(TP + FN)
-accuracy_bayes <- (TP + TN) / sum(bayes_conf[,3])
-F2_bayes  <- (1 + 2^2)*precision*recall/((2^2*precision) + recall)
+TN <- logit_conf_40[1,3] # Set all values on conf matrix
+FP <- logit_conf_40[3,3]
+FN <- logit_conf_40[2,3]
+TP <- logit_conf_40[4,3]
+precision_logit <- TP/(TP + FP) # Apply formula for precision 
+accuracy_logit <- (TP + TN) / sum(logit_conf_40[,3])
 
 TN <- lda_conf[1,3] # Set all values on conf matrix
 FP <- lda_conf[3,3]
@@ -380,28 +536,28 @@ FP <- rf_conf[3,3]
 FN <- rf_conf[2,3]
 TP <- rf_conf[4,3]
 precision <- TP/(TP + FP) # Apply formula for precision and recall (to plug into f2 score calculation)
-recall <- TP/(TP + FN)
 accuracy_rf <- (TP + TN) / sum(rf_conf[,3])
 F2_rf <- (1 + 2^2)*precision*recall/((2^2*precision) + recall)
 
 ## Plot accuracy and F2 together
 
-models <- c("RF", "LDA", "Logit-Reg", "Naiv-Bayes")
-accuracy <- c(accuracy_rf, accuracy_lda, accuracy_logit, accuracy_bayes)
-f2 <- c(F2_rf, F2_lda, f2_logit, F2_bayes)
-model_ratings <- data.frame(models, accuracy, f2)
+models <- c("0.30 Threshold", "0.40 Threshold", "0.50 Threshold", "0.60 Threshold")
+accuracy <- c(accuracy_30, accuracy_40, accuracy_50, accuracy_60)
+precision <- c(precision_30, precision_40, precision_50, precision_60)
+model_ratings <- data.frame(models, accuracy, precision)
 
 Accuracy_plot <- ggplot(model_ratings, aes(x = models, y=accuracy)) +
   labs(title="Model Accuracy", x="Model Type", y="Accuracy") +
   geom_bar(stat = "identity")
-  
-F2_plot <- ggplot(model_ratings, aes(x = models, y=f2)) +
-  labs(title="Model F2 Score", x="Model Type", y="F2 Score") +
+
+Precision_plot <- ggplot(model_ratings, aes(x = models, y=precision)) +
+  labs(title="Model Precision", x="Model Type", y="Precision") +
   geom_bar(stat = "identity")
 
-ggarrange(Accuracy_plot, F2_plot, nrow = 1, ncol = 2)
+ggarrange(Accuracy_plot, nrow = 1, ncol = 2)
+ggsave("Figures/Figure3_Scoring.png", width = 20, height = 10)
 
-scoring <- data.frame(Model=c("Accuracy", "F2"), Bayes = c(accuracy_bayes, F2_bayes), Logit=c(accuracy_logit, f2_logit), LDA = c(accuracy_lda, F2_lda), RF = c(accuracy_rf, F2_rf))
+scoring <- data.frame(Model=c("Accuracy", "Precision"), Bayes = c(accuracy_bayes, F2_bayes), Logit=c(accuracy_logit, f2_logit), LDA = c(accuracy_lda, F2_lda), RF = c(accuracy_rf, F2_rf))
 kable(scoring, digits = 3)
 ```
 
@@ -427,6 +583,7 @@ roc.rf <- roc(as.numeric(mushroom_test$binary_class), rf_pred_prob[,2])
 ## Combine all roc plots into one graph
 ggroc(list(Logit = roc.logit, Bayes = roc.bayes, LDA = roc.lda, RF = roc.rf)) +
   labs(title = "ROC Curve Comparison")
+ggsave("Figures/Figure4_ROCCurve.png", width = 15, height = 10)
 ```
 
 ## Exercise 10
